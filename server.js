@@ -8,11 +8,20 @@ const PORT = 3001;
 // Enable CORS for all origins
 app.use(cors());
 
-// Current season standings endpoint
+// Current season standings endpoint - try 2025-2026 first, fallback to 2024-2025
 app.get('/api/standings', async (req, res) => {
   try {
-    const response = await fetch('https://www.thesportsdb.com/api/v1/json/3/lookuptable.php?l=4328&s=2024-2025');
-    const data = await response.json();
+    // Try 2025-2026 first
+    let response = await fetch('https://www.thesportsdb.com/api/v1/json/3/lookuptable.php?l=4328&s=2025-2026');
+    let data = await response.json();
+    
+    // If no data for 2025-2026, try 2024-2025
+    if (!data.table || data.table.length === 0) {
+      console.log('No 2025-2026 data, trying 2024-2025...');
+      response = await fetch('https://www.thesportsdb.com/api/v1/json/3/lookuptable.php?l=4328&s=2024-2025');
+      data = await response.json();
+    }
+    
     res.json(data);
   } catch (error) {
     console.error('Error fetching standings:', error);
